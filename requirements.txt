@@ -1,0 +1,6 @@
+requests
+hyper
+pycryptodome
+youtube_dl
+msedge-selenium-tools
+Pillow
