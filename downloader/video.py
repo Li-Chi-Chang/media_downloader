@@ -1,4 +1,4 @@
-import requests
+import requests, traceback
 from time import sleep
 from urllib.parse import urljoin,urlsplit
 from hyper import HTTP20Connection
@@ -75,6 +75,7 @@ def download_video_by_m3u8(m3u8url, video_name, sleeptime=1, session=None, seria
         makedirs(video_name, exist_ok=True)
     except:
         log(video_name + ' mkdir error')
+        raise Exception(video_name + ' mkdir error')
     
     if(session is None):
         session = requests.session()
@@ -131,47 +132,54 @@ def download_video_by_m3u8(m3u8url, video_name, sleeptime=1, session=None, seria
     log(video_name + ' ' + str(serial) + ' done')
     move_to_done(video_name)
 
-def download_video_by_original_src(url,video_name,serial=0):
+def download_video_by_original_src(url,name,serial=0):
     try:
         with requests.get(url, stream=True) as r:
             total_length = int(r.headers.get('content-length'))
             if total_length is None or r.status_code == '404': # no content length header
-                log(name = video_name,string = 'ERR No file ending or 404')
+                log(name = name,string = 'ERR No file ending or 404')
                 total_length = 0
-                log(name = video_name,string = url)
+                log(name = name,string = url)
                 return
             conter = 0
-            with open(join(video_name,'video'+str(serial)+'.mp4'), 'wb') as f:
+            with open(join(name,'video'+str(serial)+'.mp4'), 'wb') as f:
                 chunk_size=8*1024*1024
                 for chunk in r.iter_content(chunk_size=chunk_size):
-                    log(name = video_name,string = str(round(conter*chunk_size/total_length*100,3))+'%')
+                    log(name = name,string = str(round(conter*chunk_size/total_length*100,3))+'%')
                     f.write(chunk)
                     conter+=1
-            change_MP4_format('video'+str(serial)+'.mp4',video_name)
-            log(name = video_name,string = 'video '+str(serial)+' done')
-            log(string = video_name+str(serial)+' done')
+            change_MP4_format('video'+str(serial)+'.mp4',name)
+            log(name = name,string = 'video '+str(serial)+' done')
+            log(string = name+str(serial)+' done')
     except:
-        log(name = video_name,string = 'some error here, check it')
-        log(string = 'some error here, check it: ' + video_name)
+        log(name = name,string = 'some error here, check it')
+        log(string = 'some error here, check it: ' + name)
+        log(name = name,string = traceback.format_exc())
+        raise Exception('error stop')
     return
 
 def download_video_by_youtube_dl(url):
-    log('download_video_by_youtube_dl: '+url+' start')
-    
-    ytdl_format_options = {
-        'outtmpl': '%(title)s.%(ext)s',
-    }
-    info_dict = None
-    with YoutubeDL(ytdl_format_options) as ydl:
-        info_dict = ydl.extract_info(url, download=False)
-    
-    name = clearify(info_dict.get('title', None))
-    makedirs(name,exist_ok=True)
-    ytdl_format_options = {
-        'outtmpl': name+'/video.%(ext)s',
-        'writethumbnail': True,
-    }
-    with YoutubeDL(ytdl_format_options) as ydl:
-        info_dict = ydl.extract_info(url, download=True)
-    log('download_video_by_youtube_dl: '+name+' downloaded')
+    try:
+        log('download_video_by_youtube_dl: '+url+' start')
+        ytdl_format_options = {
+            'outtmpl': '%(title)s.%(ext)s',
+        }
+        info_dict = None
+
+        with YoutubeDL(ytdl_format_options) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+        
+        name = clearify(info_dict.get('title', None))
+        makedirs(name,exist_ok=True)
+        ytdl_format_options = {
+            'outtmpl': name+'/video.%(ext)s',
+            'writethumbnail': True,
+        }
+        with YoutubeDL(ytdl_format_options) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+        log('download_video_by_youtube_dl: '+name+' downloaded')
+    except:
+        log(string = 'some error here, check it: ' + url+':')
+        log(string = traceback.format_exc())
+        raise Exception('error stop')
     return name

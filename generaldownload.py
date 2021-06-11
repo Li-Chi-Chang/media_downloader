@@ -1,6 +1,11 @@
 from downloader import download_control
+from os.path import isfile
 
-with open('generaldownload.txt','r') as fp:
+download_list = 'download_demo.list'
+if isfile('download.list'):
+    download_list = 'download.list'
+
+with open(download_list,'r') as fp:
     lines = fp.readlines()
     links = []
     for line in lines:

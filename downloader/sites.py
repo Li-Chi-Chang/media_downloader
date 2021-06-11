@@ -28,6 +28,10 @@ def youtubedl(urls):
         i.join()
     log('youtubedl All Done.')
 
-site_function_map = {
-    'youtube.com':{'function':youtubedl, 'browser_need': False},
-}
+mymap = {}
+try:
+    from .mysite import site_function_map as mymap
+except:
+    pass
+site_function_map = mymap.copy()
+site_function_map['youtube.com'] = {'function':youtubedl, 'browser_need': False}

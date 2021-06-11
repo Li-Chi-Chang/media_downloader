@@ -1,1 +1,10 @@
+# python
+__pycache__/**
+# webdriver
 files/
+# output
+download.log
+done/**
+# my self download site information
+mysite.py
+download.list

@@ -16,7 +16,7 @@ def download_control(urls):
                 urlclassify[site].append(url)
                 break
         if not success:
-            log(site+' urls cannot found')
+            log(url+' site cannot found')
 
     
     for site in urlclassify.keys():
