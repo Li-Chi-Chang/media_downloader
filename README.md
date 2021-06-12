@@ -35,3 +35,8 @@
 
 1. with JS -> use webdriver
 2. without JS -> use requests package only
+
+## known issues and todo list
+
+* use temp folder instead of shown in root
+* in done if has same name, it shows err and stop
